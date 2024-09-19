@@ -1,8 +1,7 @@
 library(data.table)
 
-arqMicrodados <- "MICRODADOS_ENEM_2019.csv"
-#arqLimpo <- "ENTRADA_LIMPA.csv"
-arqLimpo <- "INPUT_FILTRADO.csv"
+arqMicrodados <- "Dados\\MICRODADOS_ENEM_2019.csv"
+arqLimpo <- "Dados\\ENTRADA_LIMPA.csv"
 
 main <- function() {
   # Cria uma coluna com a média das notas
