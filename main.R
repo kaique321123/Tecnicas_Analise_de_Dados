@@ -1,5 +1,4 @@
 library(data.table)
-library(ggplot2)
 
 arqMicrodados <- "Dados\\MICRODADOS_ENEM_2019.csv"
 arqLimpo <- "Dados\\ENTRADA_LIMPA.csv"
@@ -8,22 +7,9 @@ classesRenda <- c('nula', 'baixa', 'media', 'media_alta', 'alta')
 main <- function() {
 	#calcularMediaFinal()
 	#categorizarRenda()
+  calcTendenciasCentrais()
+  criarIntervalosDeNotas()
   criarBoxPlots()
-  return()
-  
-  intervalosDeNotas()
-  
-  # Calcula média e variância geral
-  geralN <<- nrow(tabLimpa)
-  geralMedia <<- mean(tabLimpa$NotaFinal)
-  geralVariancia <<- var(tabLimpa$NotaFinal)
-  geralMediana = median(tabLimpa$NotaFinal)
-  
-  cat("N:", geralN, "\n")
-  cat("Média:", geralMedia, "\n")
-  cat("Var:", geralVariancia, "\n")
-  cat("Des:", sqrt(geralVariancia), "\n")
-  cat("Mediana: ", geralMediana, "\n")
   
   calcMedidasClasses()  
   calcQuadrados()
@@ -31,6 +17,21 @@ main <- function() {
   calcTesteF()
 }
 
+# Calcula medidas de tendência central
+calcTendenciasCentrais <- function() {
+  geralN <<- nrow(tabLimpa)
+  geralMedia <<- mean(tabLimpa$NotaFinal)
+  geralVariancia <<- var(tabLimpa$NotaFinal)
+  geralMediana = median(tabLimpa$NotaFinal)
+  
+  cat("Total:", geralN, "\n")
+  cat("Média:", geralMedia, "\n")
+  cat("Variância:", geralVariancia, "\n")
+  cat("Desvio Padrão:", sqrt(geralVariancia), "\n")
+  cat("Mediana: ", geralMediana, "\n")
+}
+
+# Executa o teste da estatística F da ANOVA
 calcTesteF <- function() {
   # Calcula a estatística F e o valor crítico
   alfa <- 0.05
@@ -47,10 +48,9 @@ calcTesteF <- function() {
   }
 }
 
-testeLevene <- function () {
-  
-}
+testeLevene <- function () {}
 
+# Teste de aderência a distribuição Normal
 testeNormalidade <- function() {
   cat("\n--- Teste de Normalidade ---\n")
   
@@ -69,6 +69,7 @@ testeNormalidade <- function() {
   }
 }
 
+# Calcula todas as somas de quadrados das classes de renda
 calcQuadrados <- function() {
   nGrupos = length(classesRenda)
   
@@ -96,6 +97,13 @@ calcQuadrados <- function() {
   
   cat("QM_Trat:", qmTrat, "\n")
   cat("QM_Erro:", qmErro, "\n")
+}
+
+criarIntervalosDeNotas <- function() {
+  cat('\n--- Intervalos de Classe ---')
+  intervalos = cut(tabLimpa$NotaFinal, breaks = c(0, 200, 400, 600, 800, 1000), right = TRUE, include.lowest = TRUE)
+  tabela = table(intervalos)
+  print(tabela)
 }
 
 calcMedidasClasses <- function() {
@@ -204,13 +212,6 @@ categorizarRenda <- function() {
   tabLimpa$ClasseRenda <<- sapply(tabLimpa$Q006, catRenda)  
   
   print("Renda categorizada!")
-}
-
-intervalosDeNotas <- function() {
-  intervalos = cut(tabLimpa$NotaFinal, breaks = c(0, 200, 400, 600, 800, 1000), right = TRUE, include.lowest = TRUE)
-  tabela = table(intervalos)
-  print(tabela)
-  #print(intervalos)
 }
 
 calcularMediaFinal <- function() {
