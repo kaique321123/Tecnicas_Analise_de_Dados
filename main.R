@@ -1,100 +1,257 @@
 library(data.table)
+library(ggplot2)
 
 arqMicrodados <- "Dados\\MICRODADOS_ENEM_2019.csv"
 arqLimpo <- "Dados\\ENTRADA_LIMPA.csv"
+classesRenda <- c('nula', 'baixa', 'media', 'media_alta', 'alta')
 
 main <- function() {
-  # Cria uma coluna com a média das notas
-  colunasNotas <- c("NU_NOTA_CN", "NU_NOTA_CH", "NU_NOTA_LC", "NU_NOTA_MT", "NU_NOTA_REDACAO")
-  tabLimpa$MediaNotas <<- rowMeans(tabLimpa[, colunasNotas])
+	#calcularMediaFinal()
+	#categorizarRenda()
+  criarBoxPlots()
+  return()
   
-  #criarColRenda()
-  
-  # Estabelece que haverão 3 plots, 3x1
-  par(mfrow = c(3,1))
-  
-  # Cria uma distribuição de notas de todos os indivíduos
-  hist(tabLimpa$MediaNotas, main="Notas", xlab="Nota", ylab="Pessoas")
-  
-  # Cria dois plots para as classes de renda de todos e dos indivíduos de melhor performance.
-  compararPerfRenda()
+  intervalosDeNotas()
   
   # Calcula média e variância geral
-  mediaGeral <- mean(tabLimpa$MediaNotas)
-  varianciaGeral <- var(tabLimpa$MediaNotas)
-  print(mediaGeral)
-  print(varianciaGeral)
+  geralN <<- nrow(tabLimpa)
+  geralMedia <<- mean(tabLimpa$NotaFinal)
+  geralVariancia <<- var(tabLimpa$NotaFinal)
+  geralMediana = median(tabLimpa$NotaFinal)
+  
+  cat("N:", geralN, "\n")
+  cat("Média:", geralMedia, "\n")
+  cat("Var:", geralVariancia, "\n")
+  cat("Des:", sqrt(geralVariancia), "\n")
+  cat("Mediana: ", geralMediana, "\n")
+  
+  calcMedidasClasses()  
+  calcQuadrados()
+  testeNormalidade()
+  calcTesteF()
 }
 
-compararPerfRenda <- function() {
-  # Faz um plot de classes de renda 
-  freqRenda <- table(tabLimpa$Q006)
-  barplot(freqRenda, main="Classes de Renda Geral", xlab="Classes", ylab="Indivíduos", col="blue")
+calcTesteF <- function() {
+  # Calcula a estatística F e o valor crítico
+  alfa <- 0.05
+  fCalc = qmTrat / qmErro
+  fCrit <- qf(1 - alfa, glTrat, glErro)
   
-  # Faz um plot de classes de renda para aqueles que tiraram notas apenas maiores que x
-  corte <- 700
-  tabTop = tabLimpa[tabLimpa$MediaNotas > corte, ]
-  freqTop = table(tabToppers$Q006)
-  barplot(freqTop, main="Renda dos Melhores", xlab="Classes", ylab="Indivíduos", col="red")
+  cat("FCalc:", fCalc, "\n")
+  cat("FCrit:", fCrit, "\n")
+  
+  if (fCalc < fCrit) {
+    print("Aceitamos H0!")
+  } else {
+    print("Rejeitamos H0!")
+  }
+}
+
+testeLevene <- function () {
   
 }
 
-# Função que transforma a categoria da renda de volta ao ponto mediano da categoria
-criarColRenda <- function() {
-  catRendaValor = c(0, 998, 1497, 1996, 2495, 2994, 3992, 4999, 5988, 6986, 7984, 8982, 9980, 11976, 14970, 19960, -1)
+testeNormalidade <- function() {
+  cat("\n--- Teste de Normalidade ---\n")
+  
+  # Executa o teste de Anderson-Darling nos dados para verificar se seguem uma distribuição normal.
+  alfa = 0.05
+  res = ad.test(tabLimpa$NotaFinal)
+  pValor = res$p.value
+  
+  cat("Estatística", res$statistic, "\n")
+  cat("P-Valor", pValor, "\n")
+  
+  if (pValor > alfa) {
+    cat("As notas seguem uma distribuição normal!")
+  } else {
+    cat("As notas NÃO seguem uma distribuição normal!")
+  }
+}
 
-  renda <- function(categoria) {
-    if (categoria == "A") return(0)
-    if (categoria == "Q") return(-1)
+calcQuadrados <- function() {
+  nGrupos = length(classesRenda)
+  
+  # Calcula as somas de quadrados nos três níveis
+  sqTotal = sum(tabClasses$C_SQTotal)
+  glTotal = geralN - 1
+  
+  sqTrat = sum(tabClasses$C_SQTrat)
+  glTrat <<- nrow(tabClasses) - 1
+  
+  sqErro = sum(tabClasses$C_SQErro)
+  glErro <<- geralN - nGrupos
+  
+  cat("SQTot:", sqTotal, "\n")
+  cat("SQTrat:", sqTrat, "\n")
+  cat("SQErro:", sqErro, "\n")
+  
+  cat("glTrat: ", glTrat, "\n")
+  cat("glErro: ", glErro, "\n")
+  cat("glTotal: ", glTotal, "\n")
+  
+  # Calcula os Quadrados Médios
+  qmTrat <<- sqTrat / glTotal
+  qmErro <<- sqErro / glErro
+  
+  cat("QM_Trat:", qmTrat, "\n")
+  cat("QM_Erro:", qmErro, "\n")
+}
 
-    indice <- alphaIndex(categoria)
-    val1 = catRendaValor[indice - 1]
-    val2 = catRendaValor[indice]
-    return((val1 + val2) / 2)
+calcMedidasClasses <- function() {
+  # Cria tabela de classes
+  tabClasses <<- data.frame(
+    nome = classesRenda,
+    stringsAsFactors = FALSE
+  )
+  
+  # Para cada classe de renda, execute a função abaixo
+  dados = lapply(classesRenda, function (classe) {
+    # Extrai todas as notas finais dos alunos com a determinada classe de renda
+    df = tabLimpa[tabLimpa$ClasseRenda == classe, "NotaFinal", drop=FALSE]
+    
+    # Calcula o tamanho, a média e variância de todas as notas
+    N = nrow(df)
+    media = mean(df$NotaFinal)
+    variancia = var(df$NotaFinal)
+    
+    # Calcula os componentes das somas de quadrados
+    C_SQTotal = sum((df$NotaFinal - geralMedia)^2)
+    C_SQTrat = N * (media - geralMedia) ^ 2
+    C_SQErro = sum((df$NotaFinal - media)^2)
+    
+    return( c(N, media, variancia, C_SQTotal, C_SQTrat, C_SQErro) )
+  })
+  
+  # Insere como colunas todos os valoes
+  tabClasses$N <<- sapply(dados, function(v) v[1])
+  tabClasses$Media <<- sapply(dados, function(v) v[2])
+  tabClasses$Variancia <<-sapply(dados, function(v) v[3])
+  tabClasses$C_SQTotal <<- sapply(dados, function(v) v[4])
+  tabClasses$C_SQTrat <<- sapply(dados, function(v) v[5])
+  tabClasses$C_SQErro <<- sapply(dados, function(v) v[6])
+}
+
+criarBoxPlots <- function() {
+  par(mfrow = c(1, 1))
+  histogramaGlobal = TRUE
+  plotsClasses = FALSE
+  
+  if (histogramaGlobal) {
+    
+    # Create the histogram with counts on the y-axis
+    hist(tabLimpa$NotaFinal, breaks = 30, plot = TRUE, col = "lightblue", border = "blue",
+                      main = "",
+                      xlab = "Notas", ylab = "Pessoas")
+    axis(1, at = seq(0, 1000, by = 50))  # Adds ticks at every 2 units
+    axis(2, at = seq(0, 10e+05, by = 1e+05))  # Adds ticks at every 2 units
+    
+    hist_data <- hist(tabLimpa$NotaFinal, breaks = 300, plot = FALSE)
+    
+    # Add a frequency polygon using the counts
+    lines(hist_data$mids, hist_data$counts * 10, type = "l", col = "red", lwd = 2)  # Frequency p
+  }
+  
+  if (plotsClasses) {
+    plots <- list(
+      list("nula", "Renda Nula", "#F00"),
+      list("baixa", "Renda Baixa", "#F80"),
+      list("media", " Renda Média", "#FF0"),
+      list("media_alta", "Renda Média-Alta", "#AF0"),
+      list("alta", "Renda Alta", "#0F0")
+    )
+    
+    labels = c("Nula", "Baixa", "Média", "Média-Alta", "Alta");
+    colors = c("#F00", "#F80", "#FF0", "#AF0", "#0F0");
+    
+    tabLimpa$ClasseRenda <- factor(tabLimpa$ClasseRenda, levels = c('nula', 'baixa', 'media', 'media_alta', 'alta'))
+    boxplot(tabLimpa$NotaFinal ~ tabLimpa$ClasseRenda, xlab="Classe de Renda", ylab="Notas", col = colors, names = labels)  
   }
 
-  # Cria uma coluna renda
-  tabLimpa$renda <- sapply(tabLimpa$Q006, renda)
+  # for (plot in plots) {
+  #   cat = plot[[1]]
+  #   titulo = plot[[2]]
+  #   cor = plot[[3]]
+  #   
+  #   tabRendaCat <- tabLimpa[tabLimpa$ClasseRenda == cat, "NotaFinal", drop = FALSE]
+  #   boxplot(tabRendaCat$NotaFinal, main=titulo, ylab="Notas", col=cor)
+  # }
 }
 
-alphaIndex <- function(ch) {
-  ch <- tolower(ch)
-  alphabet <- letters
-  index <- match(ch, alphabet)
-  return (index)
+# Cria uma nova coluna com a categoria de renda de cada pessoa, baseada na resposta do questionário
+# socioeconômico (Q006)
+categorizarRenda <- function() {
+  print("Categorizando as rendas...")
+  
+  categorias <- list(
+    list("nula",       c("A")),
+    list("baixa",      c("B", "C", "D", "E")),
+    list("media",      c("F", "G", "H", "I", "J")),
+    list("media_alta", c("K", "L", "M", "N", "O")),
+    list("alta",       c("P", "Q"))
+  )
+  
+  catRenda <- function(quest) {
+    for (catArr in categorias) {
+      if (quest %in% catArr[[2]]) {
+        return(catArr[[1]])
+      }
+    }
+    
+    stop("Resposta inválida ao questionário.")
+  }
+  
+  tabLimpa$ClasseRenda <<- sapply(tabLimpa$Q006, catRenda)  
+  
+  print("Renda categorizada!")
+}
+
+intervalosDeNotas <- function() {
+  intervalos = cut(tabLimpa$NotaFinal, breaks = c(0, 200, 400, 600, 800, 1000), right = TRUE, include.lowest = TRUE)
+  tabela = table(intervalos)
+  print(tabela)
+  #print(intervalos)
+}
+
+calcularMediaFinal <- function() {
+  # Cria uma coluna com a média final da nota de cada aluno
+  colunasNotas <- c("NU_NOTA_CN", "NU_NOTA_CH", "NU_NOTA_LC", "NU_NOTA_MT", "NU_NOTA_REDACAO")
+  tabLimpa$NotaFinal <<- rowMeans(tabLimpa[, colunasNotas])
+}
+
+# Lê o arquivo original de microdados e filtra a tabela para uma nova tabela. 
+# A nova tabela terá apenas as colunas de interesse e estará livre de valores nulos
+filtrarEntrada <- function() {
+	# Lê o arquivo com apenas as colunas desejadas
+	colunas <- c("Q006",
+							 "NU_NOTA_CN",
+							 "NU_NOTA_CH",
+							 "NU_NOTA_LC",
+							 "NU_NOTA_MT",
+							 "NU_NOTA_REDACAO")
+	dadosFiltrados <- fread(microdados, select=colunas)
+	
+	# Filtra as linhas com qualquer valor faltante
+	dadosLimpos = na.omit(dados)
+	
+	# Cria uma nova tabela com os dados limpos
+	write.csv(dadosLimpos, arqLimpo, row.names = FALSE)
+	
+	return(dadosLimpos)
 }
 
 lerEntradaLimpa <- function() {
   cat("Lendo arquivo '", arqLimpo, "' de entrada...\n")
+  
   # Lendo o arquivo CSV separado por vírgula explicitamente
   tabLimpa <<- read.csv(arqLimpo, header = TRUE, sep = ",")
   tabLimpa <<- na.omit(tabLimpa)
+  
   cat("Leitura completa!\n");
   return(tabLimpa)
 }
 
-# Lê o arquivo original de microdados e filtra a tabela para uma nova tabela. 
-# A nova tabela terá apenas as colunas de interesse e estará limpo de valores faltantes.
-filtrarEntrada <- function() {
-  # Lê o arquivo com apenas as colunas desejadas
-  colunas <- c("Q006",
-               "NU_NOTA_CN",
-               "NU_NOTA_CH",
-               "NU_NOTA_LC",
-               "NU_NOTA_MT",
-               "NU_NOTA_REDACAO")
-  dadosFiltrados <- fread(microdados, select=colunas)
-  
-  # Filtra as linhas com qualquer valor faltante
-  dadosLimpos = na.omit(dados)
-  
-  # Cria uma nova tabela com os dados limpos
-  write.csv(dadosLimpos, arqLimpo, row.names = FALSE)
-  
-  return(dadosLimpos)
-}
-
-lerEntradaLimpa()
+#lerEntradaLimpa()
 main()
 
 
