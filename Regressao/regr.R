@@ -123,8 +123,9 @@ regressaoMultipla <- function() {
   print(sumario)
 }
 
-#filtrarOutliers()
+filtrarOutliers()
 regressaoSimples()
-#plotRegressaoSimples()
-#plotResiduos()
-#regressaoMultipla()
+plotRegressaoSimples()
+plotResiduos()
+regressaoMultipla()
+

@@ -7,16 +7,34 @@ estatTabelasEMedidas <- function() {
   cat('\nD.P.:', sqrt(var(amostras$NotaRE)))
   print(table(cut(amostras$NotaRE, breaks = c(0, 200, 400, 600, 800, 1000), right = TRUE, include.lowest = TRUE)))
   
+  cat("\n:: Nota de NotaMT")
+  cat('\nMédia:', mean(amostras$NotaMT))
+  cat('\nD.P.:', sqrt(var(amostras$NotaMT)))
+  print(table(cut(amostras$NotaMT,      breaks = c(200, 400, 600, 800), right = TRUE, include.lowest = TRUE)))
+  
+  cat("\n:: Nota de NotaCN")
+  cat('\nMédia:', mean(amostras$NotaCN))
+  cat('\nD.P.:', sqrt(var(amostras$NotaCN)))
+  print(table(cut(amostras$NotaCN,      breaks = c(200, 400, 600, 800), right = TRUE, include.lowest = TRUE)))
+  
   cat("\n:: Nota de Linguagens e Códigos")
   cat('\nMédia:', mean(amostras$NotaLC))
   cat('\nD.P.:', sqrt(var(amostras$NotaLC)))
   print(table(cut(amostras$NotaLC,      breaks = c(200, 400, 600, 800), right = TRUE, include.lowest = TRUE)))
+  
+  cat("\n:: Nota de NotaCH")
+  cat('\nMédia:', mean(amostras$NotaCH))
+  cat('\nD.P.:', sqrt(var(amostras$NotaCH)))
+  print(table(cut(amostras$NotaCH,      breaks = c(200, 400, 600, 800), right = TRUE, include.lowest = TRUE)))
+  
   
   cat("\n:: Sexo")
   print(table(amostras$Sexo))
   
   cat("\n:: Escola Publica (S/N)")
   print(table(amostras$EscolaPublica))
+  
+  
   
   # Desenho dos plots
   par(mfrow = c(2, 2))
