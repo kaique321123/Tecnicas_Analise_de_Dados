@@ -2,6 +2,7 @@
 library(dplyr)
 library(car)
 library(ggplot2)
+library(pscl)
 
 # Carregar os dados
 dados <- read.csv("C:\\Users\\KaiquedeJesusPessoaS\\Desktop\\analise-mqa\\regressão logistica\\ENTRADA_REGRESSAO.csv")
@@ -38,6 +39,14 @@ conf_int_categ <- exp(confint.default(modelo_categ))
 print("Odds Ratios e Intervalos de Confiança:")
 print(data.frame(OddsRatio = odds_ratios_categ, IC_2.5 = conf_int_categ[, 1], IC_97.5 = conf_int_categ[, 2]))
 
+# Calcular log-likelihood
+log_likelihood <- logLik(modelo_categ)
+print(log_likelihood)
+
+# Calcular pseudo-R²
+pseudo_R2 <- pR2(modelo_categ)
+print(pseudo_R2)
+
 # Previsões e tabela de confusão
 predicoes_categ <- ifelse(predict(modelo_categ, type = "response") > 0.5, 1, 0)
 confusao_categ <- table(dados$Aprovado, predicoes_categ)
@@ -56,7 +65,7 @@ print("Acurácia (modelo com variáveis indicadoras para Cor):")
 print(acuracia_categ)
 
 # Gerar gráfico da regressão logística
-dados$probabilidade <- predict(modelo_quad, type = "response")
+dados$probabilidade <- predict(modelo_categ, type = "response")
 
 ggplot(dados, aes(x = media_quad, y = probabilidade)) +
   geom_point(aes(color = factor(Aprovado)), alpha = 0.5) +
@@ -78,12 +87,22 @@ coeficientes <- data.frame(
   z_value = summary(modelo_categ)$coefficients[, "z value"],
   Pr_z = summary(modelo_categ)$coefficients[, "Pr(>|z|)"]
 )
+
+#print("summary modelo categoria")
+#print(summary(modelo_categ))
+
+#odds_ratios_categ <- exp(coef(modelo_categ))
+#conf_int_categ <- exp(confint.default(modelo_categ))
+#print("comprimento e largura de odd")
+#print(length(odds_ratios_categ))
+#print(dim(conf_int_categ))
+
 print("Coeficientes do modelo de regressão logística com variáveis indicadoras para Cor:")
 print(coeficientes)
 
 # Tabela de Odds Ratios e Intervalos de Confiança
 odds_ratios_tabela <- data.frame(
-  Variável = rownames(odds_ratios_categ),
+  Variável = names(odds_ratios_categ),
   OddsRatio = odds_ratios_categ,
   IC_2.5 = conf_int_categ[, 1],
   IC_97.5 = conf_int_categ[, 2]
@@ -105,5 +124,15 @@ metricas <- data.frame(
 )
 print("Métricas de Desempenho:")
 print(metricas)
+
+# Calcular os Resíduos 
+residuos <- residuals(modelo_categ, type = "deviance")
+ggplot(dados, aes(x = media_quad, y = residuos)) + geom_point() + geom_smooth(se = FALSE) +
+  labs(title = "Tendência dos Resíduos")
+
+
+# Autocorrelação dos Resíduos com as Variáveis Independentes
+acf(residuos, main = "Autocorrelação dos Resíduos")
+
 
 
