@@ -24,6 +24,7 @@ dados <- dados %>%
     CorPardo = ifelse(Cor == "Pa", 1, 0)
   ) %>%
   filter(!is.na(media))
+dt <- dados
 
 # Ajustar o modelo de regressão logística
 modelo_categ <- glm(Aprovado ~ media_quad + EscolaPublica + CorBranco + CorPreto + CorPardo, data = dados, family = binomial(link = "logit"))
@@ -132,3 +133,23 @@ ggplot(data = data.frame(residuos, valores_ajustados), aes(x = valores_ajustados
   geom_smooth(method = "loess", color = "blue", se = FALSE) +
   labs(title = "Gráfico de Resíduos vs. Valores Ajustados", x = "Valores Ajustados", y = "Resíduos") +
   theme_minimal()
+
+
+
+
+# Estatísticas descritivas após normalizar
+mean_value <- mean(dt$media, na.rm = TRUE)
+median_value <- median(dt$media, na.rm = TRUE)
+sd_value <- sd(dt$media, na.rm = TRUE)
+var_value <- var(dt$media, na.rm = TRUE)
+min_value <- min(dt$media, na.rm = TRUE)
+max_value <- max(dt$media, na.rm = TRUE)
+quartis <- quantile(dt$media, probs = c(0.25, 0.50, 0.75), na.rm = TRUE)
+
+cat("Média:", mean_value, "\n")
+cat("Mediana:", median_value, "\n")
+cat("Desvio Padrão:", sd_value, "\n")
+cat("Variância:", var_value, "\n")
+cat("Mínimo:", min_value, "\n")
+cat("Máximo:", max_value, "\n")
+cat("Quartis:", quartis, "\n")
