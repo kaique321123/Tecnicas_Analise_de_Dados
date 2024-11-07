@@ -9,7 +9,7 @@ while (!is.null(dev.list())) dev.off()
 
 
 # Carregar os dados
-dados <- read.csv("MQA2024_grupo12–dataset_regressão_logística.csv")
+dados <- read.csv("C://Users//KaiquedeJesusPessoaS//Desktop//analise-mqa//regressão logistica//MQA2024–grupo12–dataset_regressão_logística.csv")
 
 # Manipulação de dados: cálculo da média e criando variáveis dummy de Cor
 dados <- dados %>%
