@@ -9,7 +9,7 @@ while (!is.null(dev.list())) dev.off()
 
 
 # Carregar os dados
-dados <- read.csv("C:\\Users\\KaiquedeJesusPessoaS\\Desktop\\analise-mqa\\regressão logistica\\ENTRADA_REGRESSAO.csv")
+dados <- read.csv("MQA2024_grupo12–dataset_regressão_logística.csv")
 
 # Manipulação de dados: cálculo da média e criando variáveis dummy de Cor
 dados <- dados %>%
@@ -133,9 +133,6 @@ ggplot(data = data.frame(residuos, valores_ajustados), aes(x = valores_ajustados
   geom_smooth(method = "loess", color = "blue", se = FALSE) +
   labs(title = "Gráfico de Resíduos vs. Valores Ajustados", x = "Valores Ajustados", y = "Resíduos") +
   theme_minimal()
-
-
-
 
 # Estatísticas descritivas após normalizar
 mean_value <- mean(dt$media, na.rm = TRUE)
