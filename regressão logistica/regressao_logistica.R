@@ -11,7 +11,7 @@ while (!is.null(dev.list())) dev.off()
 # Carregar os dados
 dados <- read.csv("C:\\Users\\KaiquedeJesusPessoaS\\Desktop\\analise-mqa\\regressão logistica\\ENTRADA_REGRESSAO.csv")
 
-# Manipulação de dados: cálculo da média e codificação das variáveis de Cor
+# Manipulação de dados: cálculo da média e criando variáveis dummy de Cor
 dados <- dados %>%
   mutate(
     media = rowMeans(select(., NotaCN, NotaCH, NotaLC, NotaMT, NotaRE), na.rm = TRUE),
@@ -38,14 +38,8 @@ print("Valores de VIF para verificar a multicolinearidade:")
 print(vif_values)
 
 # Verificação da Tendência dos Resíduos
-# Gráfico de Resíduos vs. Valores Ajustados
 residuos <- residuals(modelo_categ, type = "deviance")
 valores_ajustados <- fitted(modelo_categ)
-ggplot(data = data.frame(residuos, valores_ajustados), aes(x = valores_ajustados, y = residuos)) +
-  geom_point() +
-  geom_smooth(method = "loess", color = "blue", se = FALSE) +
-  labs(title = "Gráfico de Resíduos vs. Valores Ajustados", x = "Valores Ajustados", y = "Resíduos") +
-  theme_minimal()
 
 # Calcular Odds Ratio e Intervalos de Confiança
 odds_ratios_categ <- exp(coef(modelo_categ))
@@ -99,15 +93,15 @@ metricas <- data.frame(
 print("Métricas de Desempenho:")
 print(metricas)
 
-# Calcular os Resíduos 
+# Calcular os Resíduos e exibir os gráficos 
 residuos <- residuals(modelo_categ, type = "deviance")
 ggplot(dados, aes(x = media_quad, y = residuos)) + geom_point() + geom_smooth(se = FALSE) +
   labs(title = "Tendência dos Resíduos")
 
-
 # Autocorrelação dos Resíduos com as Variáveis Independentes
 acf(residuos, main = "Autocorrelação dos Resíduos")
 
+# Gráfico de Regressão Logística
 print(ggplot(dados, aes(x = media_quad, y = Aprovado)) +
         geom_point(aes(color = factor(Aprovado)), alpha = 0.5) + 
         geom_smooth(method = "glm", method.args = list(family = "binomial"), se = FALSE, color = "blue", formula = y ~ x) + 
@@ -117,18 +111,24 @@ print(ggplot(dados, aes(x = media_quad, y = Aprovado)) +
              color = "Aprovado") +
         theme_minimal())
 
-
 # Calcular os resíduos de deviance e os valores ajustados
 residuos <- residuals(modelo_categ, type = "deviance")
 valores_ajustados <- fitted(modelo_categ)
 
-# Gráfico de Resíduos vs. Valores Ajustados com ggplot2
+# Gráfico de Resíduos vs. Valores Ajustados 
 print(ggplot(data = data.frame(ValoresAjustados = valores_ajustados, Residuos = residuos), 
-       aes(x = ValoresAjustados, y = Residuos)) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(method = "loess", color = "blue", se = FALSE) +
-  labs(title = "Gráfico de Resíduos vs. Valores Ajustados",
-       x = "Valores Ajustados",
-       y = "Resíduos de Deviance") +
-  theme_minimal()
+             aes(x = ValoresAjustados, y = Residuos)) +
+        geom_point(alpha = 0.5) +
+        geom_smooth(method = "loess", color = "blue", se = FALSE) +
+        labs(title = "Gráfico de Resíduos vs. Valores Ajustados",
+             x = "Valores Ajustados",
+             y = "Resíduos de Deviance") +
+        theme_minimal()
 )
+
+# Autocorrelação dos Resíduos
+ggplot(data = data.frame(residuos, valores_ajustados), aes(x = valores_ajustados, y = residuos)) +
+  geom_point() +
+  geom_smooth(method = "loess", color = "blue", se = FALSE) +
+  labs(title = "Gráfico de Resíduos vs. Valores Ajustados", x = "Valores Ajustados", y = "Resíduos") +
+  theme_minimal()
