@@ -144,7 +144,7 @@ sd_value <- sd(dt$media, na.rm = TRUE)
 var_value <- var(dt$media, na.rm = TRUE)
 min_value <- min(dt$media, na.rm = TRUE)
 max_value <- max(dt$media, na.rm = TRUE)
-quartis <- quantile(dt$media, probs = c(0.25, 0.50, 0.75), na.rm = TRUE)
+quartis <- quantile(dt$media, probs = c(0.25, 0.50, 0.75, 1), na.rm = TRUE)
 
 cat("Média:", mean_value, "\n")
 cat("Mediana:", median_value, "\n")
