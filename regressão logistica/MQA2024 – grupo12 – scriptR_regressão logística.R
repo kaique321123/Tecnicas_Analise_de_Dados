@@ -24,6 +24,8 @@ dados <- dados %>%
     CorPardo = ifelse(Cor == "Pa", 1, 0)
   ) %>%
   filter(!is.na(media))
+
+# Atribuir o dataset a outro objeto, pois aquele estava com problema para calular as estatísticas descritivas  
 dt <- dados
 
 # Ajustar o modelo de regressão logística
