@@ -13,7 +13,9 @@ data$Class <- ifelse(data$Class == "Eco", 1, 0)
 data$satisfaction <- ifelse(data$satisfaction == "satisfied", 1, 0)
 
 # "Gender" e "Gate.location" tem KMO muito baixo, então retirei essas variáveis
-selected_columns <- data[, c( "Class", "Age","Flight.Distance","satisfaction","Food.and.drink","Online.boarding","Seat.comfort","Baggage.handling","Cleanliness","Inflight.wifi.service")] 
+selected_columns <- data[, c( "Class", "Age","Flight.Distance","satisfaction",
+                              "Food.and.drink","Online.boarding","Seat.comfort",
+                              "Baggage.handling","Cleanliness","Inflight.wifi.service")] 
 View(selected_columns)
 
 # KMO
@@ -34,8 +36,6 @@ print(bartlett_test)
 # MSA para cada variável
 msa_per_variable <- kmo_result$MSA
 print(msa_per_variable)
-
-
 
 # ESCOLHA DO NÚMERO DE FATORES
 # 1. Autovalores (eigenvalues)
