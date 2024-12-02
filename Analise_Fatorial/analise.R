@@ -47,7 +47,7 @@ fa.parallel(correlation_matrix, n.obs = 10000, fa = "pc", main = "Scree Plot")
 
 # 3. Variância explicada
 print("Rotação")
-fa_var <- fa(correlation_matrix, nfactors = length(fa_eigenvalues), rotate = "none")
+fa_var <- fa(correlation_matrix, nfactors = length(fa_eigenvalues), rotate = "Varimax")
 print(fa_var)
 
 # 4. Determinação automática de fatores
@@ -60,6 +60,8 @@ get_mode <- function(v) {
   uniq_v <- unique(v)
   uniq_v[which.max(tabulate(match(v, uniq_v)))]
 }
+
+
 
 # Calcular as medidas apenas para variáveis numéricas
 medidas_numericas <- data.frame(
@@ -121,3 +123,18 @@ print(medidas_numericas)
 
 print("Medidas Categóricas:")
 print(medidas_categoricas)
+
+
+
+
+# Criar a matriz de correlação com os dados selecionados
+numeric_columns <- sapply(selected_columns, is.numeric)
+cor_matrix <- cor(selected_columns[, numeric_columns])
+
+# Realizar a análise fatorial
+fa_result <- fa(cor_matrix, nfactors = 4, rotate = "varimax")
+
+# Criar o diagrama de fatores
+fa.diagram(fa_result)
+
+
