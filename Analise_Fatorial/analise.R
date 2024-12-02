@@ -47,7 +47,7 @@ fa.parallel(correlation_matrix, n.obs = 10000, fa = "pc", main = "Scree Plot")
 
 # 3. Variância explicada
 print("Rotação")
-fa_var <- fa(correlation_matrix, nfactors = length(fa_eigenvalues), rotate = "Varimax")
+fa_var <- fa(correlation_matrix, nfactors = length(fa_eigenvalues), rotate = "none")
 print(fa_var)
 
 # 4. Determinação automática de fatores
@@ -132,7 +132,7 @@ numeric_columns <- sapply(selected_columns, is.numeric)
 cor_matrix <- cor(selected_columns[, numeric_columns])
 
 # Realizar a análise fatorial
-fa_result <- fa(cor_matrix, nfactors = 4, rotate = "varimax")
+fa_result <- fa(cor_matrix, nfactors = 4, rotate = "none")
 
 # Criar o diagrama de fatores
 fa.diagram(fa_result)
