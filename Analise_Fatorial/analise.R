@@ -137,4 +137,20 @@ fa_result <- fa(cor_matrix, nfactors = 4, rotate = "none")
 # Criar o diagrama de fatores
 fa.diagram(fa_result)
 
+library(ggplot2)
+library(reshape2)
+
+# Transformar os dados para o formato longo
+data_long <- melt(selected_columns)
+
+# Criar boxplots para cada variável
+ggplot(data_long, aes(x = variable, y = value)) +
+  geom_boxplot(fill = "skyblue", color = "darkblue") +
+  theme_minimal() +
+  labs(title = "Boxplots das Variáveis Quantitativas",
+       x = "Variáveis",
+       y = "Valores") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
 
