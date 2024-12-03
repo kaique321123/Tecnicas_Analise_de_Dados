@@ -2,6 +2,7 @@ library(psych)
 library(nFactors)
 library(ggplot2)
 library(cluster)
+library(reshape2)
 
 #data <- read.csv("Passageiros_Satisfacao_menor.csv")
 data <- read.csv("Analise_Fatorial//Passageiros_Satisfacao_menor.csv")
@@ -132,25 +133,25 @@ numeric_columns <- sapply(selected_columns, is.numeric)
 cor_matrix <- cor(selected_columns[, numeric_columns])
 
 # Realizar a análise fatorial
-fa_result <- fa(cor_matrix, nfactors = 4, rotate = "none")
+fa_result <- fa(cor_matrix, nfactors = 3, rotate = "none")
 
 # Criar o diagrama de fatores
 fa.diagram(fa_result)
 
-library(ggplot2)
-library(reshape2)
+colunas_box_plot <- data[, c("Food.and.drink","Online.boarding","Seat.comfort",
+                              "Baggage.handling","Cleanliness","Inflight.wifi.service")] 
 
 # Transformar os dados para o formato longo
-data_long <- melt(selected_columns)
+data_long <- melt(colunas_box_plot)
 
-# Criar boxplots para cada variável
-ggplot(data_long, aes(x = variable, y = value)) +
-  geom_boxplot(fill = "skyblue", color = "darkblue") +
-  theme_minimal() +
-  labs(title = "Boxplots das Variáveis Quantitativas",
-       x = "Variáveis",
-       y = "Valores") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
+# Criar boxplots para as variáveis normalizadas
+print(ggplot(data_long, aes(x = variable, y = value)) +
+        geom_boxplot(fill = "skyblue", color = "darkblue") +
+        theme_minimal() +
+        labs(title = "Boxplots das Variáveis Quantitativas",
+             x = "Variáveis",
+             y = "Notas") +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1))
+)
 
 
