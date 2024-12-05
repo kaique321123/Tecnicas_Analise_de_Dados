@@ -48,9 +48,15 @@ Para reproduzir as análises, você precisará ter o R instalado em seu sistema,
 - `Dados/`  
   Contém os conjuntos de dados utilizados nas análises.  
 
-- `Dicionário_Microdados_Enem_2019/`
+- `Dicionário_Microdados_Enem_2019/`\
   Apresenta uma tradução do que significa as questões que possuem apenas código e o significado das siglas.
 
+- `Link do Arquivo do ENEM oficial do Site do INEP`  
+  Não foi possível subir o arquivo oficial do INEP devido ao seu tamanho, mas está nesse link, só é necessário para rodar a técnica ANOVA
+  ````
+  https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/enem
+  ````
+  
 ## Como Executar
 
 1. Clone este repositório:  
